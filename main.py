@@ -5,12 +5,14 @@ from PyQt5.QtWidgets import (
     QTreeWidgetItem,
     QLabel,
     QScrollArea,
-    QVBoxLayout
+    QVBoxLayout,
+    QPushButton
 )
 from PyQt5.QtCore import Qt
 
 import sys, os
 from filetree import FileTree
+import pyperclip
 
 code_display = None
 code_display_content = None
@@ -35,6 +37,10 @@ def handle_item_click(item : QTreeWidgetItem, col:int):
     text = get_text_file(path)
     code_display_content.setText(text)
 
+def copy_text():
+    pyperclip.copy(code_display_content.text())
+    pyperclip.paste()
+
 app = QApplication(sys.argv)
 
 # Create File Tree Structure
@@ -56,14 +62,17 @@ scroll.setWidgetResizable(True)
 scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
 scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-#code_display.addScrollBarWidget(code_display_content, Qt.AlignmentFlag.AlignCenter)
+copy_button = QPushButton("Copy")
+copy_button.clicked.connect(copy_text)
 
 main_h_lay = QHBoxLayout()
 main_h_lay.addWidget(tree)
 main_h_lay.addWidget(scroll)
+main_h_lay.addWidget(copy_button)
 
 window = QWidget()
 window.setLayout(main_h_lay)
+window.setFixedSize(1200,800)
 window.show()
 
 
