@@ -14,11 +14,13 @@ DARK SECONDARY: #2d2d30
 
 .GREEN {
     background-color: #159947;
+    border: none;
 }
 
 .TREE_VIEW {
     font-size: 20px;
     padding: 10px;
+    border: none;
 }
 
 .CODE_CONTENT {
@@ -26,12 +28,19 @@ DARK SECONDARY: #2d2d30
     font-size: 15px;
 }
 
+QTextEdit {
+    background-color: #2d2d30;
+    border: none;
+}
+
 QScrollArea {
     background-color: #1e1e1e;
+    border: none;
 }
 
 QScrollBar {
     background-color: #1e1e1e;
+    border: none;
 }
 
 QMainWindow {
