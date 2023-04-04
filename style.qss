@@ -9,8 +9,80 @@ DARK SECONDARY: #2d2d30
 
 .SECONDARY_DARK {
     background-color: #2d2d30;
+    color: white;
 }
 
 .GREEN {
     background-color: #159947;
+}
+
+.TREE_VIEW {
+    font-size: 20px;
+    padding: 10px;
+}
+
+.CODE_CONTENT {
+    color: white;
+    font-size: 15px;
+}
+
+QScrollArea {
+    background-color: #1e1e1e;
+}
+
+QScrollBar {
+    background-color: #1e1e1e;
+}
+
+QMainWindow {
+    background-color: #1e1e1e;
+}
+
+QScrollBar::up-arrow, QScrollBar::down-arrow {
+    height: 0px;
+    width: 0px;
+}
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: #1e1e1e;
+}
+
+QScrollBar::right-arrow:horizontal, 
+QScrollBar::left-arrow:horizontal,
+QScrollBar::up-arrow:vertical,
+QScrollBar::down-arrow:vertical
+{
+      border: none;
+      background: none;
+      color: none;
+      width: 0px;
+      height: 0px;
+}
+
+QScrollBar::add-line:horizontal, 
+QScrollBar::sub-line:horizontal,
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+}
+
+QScrollBar::sub-line:horizontal {
+    border: none;
+    background: none;
+}
+
+QScrollBar::handle {
+    background-color: #159947;
+}
+
+
+QTreeWidget::branch:open:has-children:!has-siblings,
+QTreeWidget::branch:open:has-children:has-siblings  {
+    border-image: none;
+    image: url(downarrow.png);
+}
+QTreeWidget::branch:has-children:!has-siblings:closed,
+QTreeWidget::branch:closed:has-children:has-siblings {
+    border-image: none;
+    image: url(rightarrow.png);
 }
