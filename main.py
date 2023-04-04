@@ -6,7 +6,8 @@ from PyQt5.QtWidgets import (
     QLabel,
     QScrollArea,
     QVBoxLayout,
-    QPushButton
+    QPushButton,
+    QSizePolicy
 )
 from PyQt5.QtCore import Qt
 
@@ -63,16 +64,22 @@ scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
 scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
 copy_button = QPushButton("Copy")
+copy_button.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+copy_button.setMinimumSize(50,100)
+copy_button.setStyleSheet('QPushButton { transform: rotate(270deg); }')
 copy_button.clicked.connect(copy_text)
 
 main_h_lay = QHBoxLayout()
+main_h_lay.setContentsMargins(30,30,30,30)
+main_h_lay.setSpacing(20)
 main_h_lay.addWidget(tree)
 main_h_lay.addWidget(scroll)
 main_h_lay.addWidget(copy_button)
 
+
 window = QWidget()
 window.setLayout(main_h_lay)
-window.setFixedSize(1200,800)
+window.setFixedSize(1400,800)
 window.show()
 
 
