@@ -94,7 +94,7 @@ class MainWindow(QMainWindow):
         self.syntax_highlighter = PyHighlight(self.code_display_content.document())
 
     def copy_text_from_code_panel(self):
-         pyperclip.copy(self.code_display_content.text())
+         pyperclip.copy(self.code_display_content.toPlainText())
          pyperclip.paste()
 
     def handle_tree_item_click(self, item : QTreeWidgetItem, col:int):
