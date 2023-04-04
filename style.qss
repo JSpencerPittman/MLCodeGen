@@ -1,6 +1,7 @@
 /*
 DARK PRIMARY: #1e1e1e
 DARK SECONDARY: #2d2d30
+GREEN: #159947
 */
 
 .PRIMARY_DARK {
@@ -9,56 +10,51 @@ DARK SECONDARY: #2d2d30
 
 .SECONDARY_DARK {
     background-color: #2d2d30;
-    color: white;
 }
 
 .GREEN {
     background-color: #159947;
-    border: none;
 }
 
 .TREE_VIEW {
     font-size: 20px;
     padding: 10px;
     border: none;
+    color: white;
 }
 
 .CODE_CONTENT {
     color: white;
     font-size: 15px;
-}
-
-QTextEdit {
     background-color: #2d2d30;
     border: none;
 }
 
-QScrollArea {
-    background-color: #1e1e1e;
+.COPY_BUTTON {
     border: none;
 }
+
+/* Style the Scroll Bars */
 
 QScrollBar {
     background-color: #1e1e1e;
     border: none;
 }
 
-QMainWindow {
-    background-color: #1e1e1e;
-}
-
-QScrollBar::up-arrow, QScrollBar::down-arrow {
-    height: 0px;
-    width: 0px;
-}
 QScrollBar::add-page, QScrollBar::sub-page {
     background: #1e1e1e;
+}
+
+QScrollBar::handle {
+    background-color: #159947;
 }
 
 QScrollBar::right-arrow:horizontal, 
 QScrollBar::left-arrow:horizontal,
 QScrollBar::up-arrow:vertical,
-QScrollBar::down-arrow:vertical
+QScrollBar::down-arrow:vertical,
+QScrollBar::add-line, 
+QScrollBar::sub-line
 {
       border: none;
       background: none;
@@ -67,31 +63,15 @@ QScrollBar::down-arrow:vertical
       height: 0px;
 }
 
-QScrollBar::add-line:horizontal, 
-QScrollBar::sub-line:horizontal,
-QScrollBar::add-line:vertical,
-QScrollBar::sub-line:vertical {
-    border: none;
-    background: none;
-}
-
-QScrollBar::sub-line:horizontal {
-    border: none;
-    background: none;
-}
-
-QScrollBar::handle {
-    background-color: #159947;
-}
-
+/* Style the tree view */
 
 QTreeWidget::branch:open:has-children:!has-siblings,
 QTreeWidget::branch:open:has-children:has-siblings  {
     border-image: none;
-    image: url(downarrow.png);
+    image: url(rsc/downarrow.png);
 }
 QTreeWidget::branch:has-children:!has-siblings:closed,
 QTreeWidget::branch:closed:has-children:has-siblings {
     border-image: none;
-    image: url(rightarrow.png);
+    image: url(rsc/rightarrow.png);
 }

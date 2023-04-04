@@ -84,8 +84,8 @@ class MainWindow(QMainWindow):
         self.copy_button.setSizePolicy(QSizePolicy.Policy.Minimum, 
                                        QSizePolicy.Policy.Expanding)
         self.copy_button.setMinimumSize(70,100)
-        self.copy_button.setProperty('class', 'GREEN')
-        self.copy_button.setIcon(QIcon('copy.png'))
+        self.copy_button.setProperty('class', 'GREEN COPY_BUTTON')
+        self.copy_button.setIcon(QIcon('rsc/copy.png'))
         self.copy_button.setIconSize(QSize(40,40))
 
         self.copy_button.clicked.connect(self.copy_text_from_code_panel)
