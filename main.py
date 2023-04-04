@@ -9,7 +9,8 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QSizePolicy
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QIcon
 
 import sys, os
 from filetree import FileTree
@@ -49,25 +50,30 @@ ft = FileTree("codestore")
 ft.create_file_tree(trim=True)
 tree = ft.get_qt_tree(handle_item_click)
 tree.setHeaderLabel("CodeStore")
+tree.setProperty('class', 'SECONDARY_DARK')
+tree.setHeaderHidden(True)
 
 code_display = QWidget()
 scroll = QScrollArea()
 right_v_lay = QVBoxLayout()
-code_display_content = QLabel("Right Side")
+code_display_content = QLabel("Select A File...")
 
 right_v_lay.addWidget(code_display_content)
 code_display.setLayout(right_v_lay)
 scroll.setWidget(code_display)
+code_display.setProperty('class', 'SECONDARY_DARK')
 
 scroll.setWidgetResizable(True)
 scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
 scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-copy_button = QPushButton("Copy")
+copy_button = QPushButton()
 copy_button.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-copy_button.setMinimumSize(50,100)
-copy_button.setStyleSheet('QPushButton { transform: rotate(270deg); }')
+copy_button.setMinimumSize(70,100)
+copy_button.setProperty('class', 'GREEN')
 copy_button.clicked.connect(copy_text)
+copy_button.setIcon(QIcon('copy.png'))
+copy_button.setIconSize(QSize(40,40))
 
 main_h_lay = QHBoxLayout()
 main_h_lay.setContentsMargins(30,30,30,30)
@@ -80,7 +86,10 @@ main_h_lay.addWidget(copy_button)
 window = QWidget()
 window.setLayout(main_h_lay)
 window.setFixedSize(1400,800)
+window.setProperty('class', 'PRIMARY_DARK')
 window.show()
 
+with open("style.qss", 'r') as f:
+    app.setStyleSheet(f.read())
 
 app.exec()

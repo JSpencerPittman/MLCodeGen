@@ -1,0 +1,16 @@
+/*
+DARK PRIMARY: #1e1e1e
+DARK SECONDARY: #2d2d30
+*/
+
+.PRIMARY_DARK {
+    background-color: #1e1e1e;
+}
+
+.SECONDARY_DARK {
+    background-color: #2d2d30;
+}
+
+.GREEN {
+    background-color: #159947;
+}
