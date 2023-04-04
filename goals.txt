@@ -1,8 +1,0 @@
-Make Copy Button take up full height
-Replace copy button text with image
-Add Margins around the body
-Replace Placeholder Text
-Dark Theme
-Add Margins in between content
-Syntax Highlighting?
-Process Breakdown?

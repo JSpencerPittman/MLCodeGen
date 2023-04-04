@@ -3,145 +3,125 @@ from PyQt5.QtWidgets import (
     QWidget,
     QHBoxLayout,
     QTreeWidgetItem,
-    QLabel,
-    QScrollArea,
     QVBoxLayout,
     QPushButton,
     QSizePolicy,
     QMainWindow,
-    QTextEdit
+    QTextEdit,
+    QTreeWidget
 )
-from PyQt5.QtCore import Qt, QSize, QRegExp
-from PyQt5.QtGui import QIcon, QSyntaxHighlighter, QTextCharFormat, QFont, QTextOption, QColor
 
-import sys, os
+from PyQt5.QtCore import QSize
+
+from PyQt5.QtGui import QIcon, QTextOption
+
+import sys
 from filetree import FileTree
+from SyntaxHighlight import PyHighlight
 import pyperclip
 
-# class MyHighlighter(QSyntaxHighlighter):
-#     def highlightBlock(self, text):
-#         myClassFormat = QTextCharFormat()
-#         myClassFormat.setFontWeight(QFont.Bold)
-#         myClassFormat.setForeground(Qt.darkMagenta)
-#         pattern = "\\bMy[A-Za-z]+\\b"
+WINDOW_WIDTH = 1400
+WINDOW_HEIGHT = 800
+RECYCLED_CODE_DIR = "codestore"
 
-#         expression = QRegExp(pattern)
-#         index = text.indexOf(expression)
-#         while index >= 0:
-#             length = expression.matchedLength()
-#             self.setFormat(index, length, myClassFormat)
-#             index = text.indexOf(expression, index + length)
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.central_widget = QWidget()
+        self.main_layout = QHBoxLayout()
 
-class Highlighter(QSyntaxHighlighter):
-    def __init__(self, parent=None):
-        super(Highlighter, self).__init__(parent)
-        self.highlighting_rules = []
-        self.keyword_format = QTextCharFormat()
-        self.keyword_format.setForeground(QColor('#00AA00'))
-        keywords = ['if', 'else', 'while', 'for', 'in', 'break', 'continue', 'return', 'def', 'class', 'import', 'from']
-        for word in keywords:
-            pattern = "\\b" + word + "\\b"
-            rule = QTextCharFormat()
-            rule.setForeground(QColor('#00AA00'))
-            rule.setFontWeight(QFont.Bold)
-            self.highlighting_rules.append((QRegExp(pattern), rule))
-    
-    def highlightBlock(self, text):
-        for pattern, rule in self.highlighting_rules:
-            expression = QRegExp(pattern)
-            index = expression.indexIn(text)
-            while index >= 0:
-                length = expression.matchedLength()
-                self.setFormat(index, length, rule)
-                index = expression.indexIn(text, index + length)
+        self.tree_view = QTreeWidget()
+        
+        self.code_display = QWidget()
+        self.code_display_layout = QVBoxLayout()
+        self.code_display_content = QTextEdit()
 
-code_display = None
-code_display_content = None
+        self.copy_button = QPushButton()
 
-def get_text_file(path):
-    with open(path, 'r') as f:
-        return f.read()
+        self.init_tree_view()
+        self.init_copy_button()
+        self.init_code_display()
 
-def handle_item_click(item : QTreeWidgetItem, col:int):
-    # If a directory ignore it
-    if item.childCount() > 0:
-        return
-    
-    path = item.text(0)
-    parent = item.parent()
-    while parent:
-        path = parent.text(0) + '/' + path
-        parent = parent.parent()
-    path = "codestore/" + path
+        self.init_central_widget()
+        self.init_main_layout()
 
-    print(path)
-    text = get_text_file(path)
-    code_display_content.setText(text)
+        self.init_syntax_highlighter()
 
-def copy_text():
-    pyperclip.copy(code_display_content.text())
-    pyperclip.paste()
+        self.setCentralWidget(self.central_widget)
+        self.setWindowTitle("ML Code Recycler")
 
-app = QApplication(sys.argv)
+    def init_main_layout(self):
+        self.main_layout.addWidget(self.tree_view)
+        self.main_layout.addWidget(self.code_display)
+        self.main_layout.addWidget(self.copy_button)
 
-# Create File Tree Structure
-ft = FileTree("codestore")
-ft.create_file_tree(trim=True)
-tree = ft.get_qt_tree(handle_item_click)
-tree.setHeaderLabel("CodeStore")
-tree.setProperty('class', 'SECONDARY_DARK TREE_VIEW')
-tree.setHeaderHidden(True)
+        self.main_layout.setContentsMargins(30,30,30,30)
+        self.main_layout.setSpacing(20)
 
-code_display = QWidget()
-scroll = QScrollArea()
-right_v_lay = QVBoxLayout()
-code_display_content = QTextEdit("")
-code_display_content.setWordWrapMode(QTextOption.WrapMode.NoWrap)
-highlighter = Highlighter(code_display_content.document())
-#code_display_content.textChanged.connect(highlighter.rehighlight)
+    def init_central_widget(self):
+        self.central_widget.setLayout(self.main_layout)
 
-right_v_lay.addWidget(code_display_content)
-code_display.setLayout(right_v_lay)
-#scroll.setWidget(code_display)
-scroll.setProperty('class', 'SCROLL')
-code_display_content.setProperty('class', 'CODE_CONTENT')
-code_display.setProperty('class', 'SECONDARY_DARK')
+        self.central_widget.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
+        self.central_widget.setProperty('class', 'PRIMARY_DARK')
 
-scroll.setWidgetResizable(True)
-scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+    def init_tree_view(self):
+        file_tree = FileTree(RECYCLED_CODE_DIR)
+        file_tree.create_file_tree(trim=True)
+        self.tree_view = file_tree.get_qt_tree(self.handle_tree_item_click)
+        self.tree_view.setProperty('class', 'SECONDARY_DARK TREE_VIEW')
+        self.tree_view.setHeaderHidden(True)
 
-v_scrollbar = scroll.verticalScrollBar()
+    def init_code_display(self):
+        self.code_display.setLayout(self.code_display_layout)
+        self.code_display.setProperty('class', 'SECONDARY_DARK')
+        
+        self.code_display_layout.addWidget(self.code_display_content)
 
-h_scrollbar = scroll.horizontalScrollBar()
+        self.code_display_content.setProperty('class', 'CODE_CONTENT')
+        self.code_display_content.setWordWrapMode(QTextOption.WrapMode.NoWrap)
 
-copy_button = QPushButton()
-copy_button.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-copy_button.setMinimumSize(70,100)
-copy_button.setProperty('class', 'GREEN')
-copy_button.clicked.connect(copy_text)
-#copy_button.clicked.connect(highlighter.rehighlight)
-copy_button.setIcon(QIcon('copy.png'))
-copy_button.setIconSize(QSize(40,40))
+    def init_copy_button(self):
+        self.copy_button.setSizePolicy(QSizePolicy.Policy.Minimum, 
+                                       QSizePolicy.Policy.Expanding)
+        self.copy_button.setMinimumSize(70,100)
+        self.copy_button.setProperty('class', 'GREEN')
+        self.copy_button.setIcon(QIcon('copy.png'))
+        self.copy_button.setIconSize(QSize(40,40))
 
-main_h_lay = QHBoxLayout()
-main_h_lay.setContentsMargins(30,30,30,30)
-main_h_lay.setSpacing(20)
-main_h_lay.addWidget(tree)
-main_h_lay.addWidget(code_display)
-main_h_lay.addWidget(copy_button)
+        self.copy_button.clicked.connect(self.copy_text_from_code_panel)
 
+    def init_syntax_highlighter(self):
+        self.syntax_highlighter = PyHighlight(self.code_display_content.document())
 
-window = QMainWindow()
-central_widget = QWidget()
-central_widget.setLayout(main_h_lay)
-central_widget.setFixedSize(1400,800)
-central_widget.setProperty('class', 'PRIMARY_DARK')
-window.setCentralWidget(central_widget)
-window.setWindowTitle("ML Code Recycle")
-window.show()
+    def copy_text_from_code_panel(self):
+         pyperclip.copy(self.code_display_content.text())
+         pyperclip.paste()
 
-with open("style.qss", 'r') as f:
-    app.setStyleSheet(f.read())
+    def handle_tree_item_click(self, item : QTreeWidgetItem, col:int):
+        # If a directory ignore it
+        if item.childCount() > 0:
+            return
+        
+        path = item.text(0)
+        parent = item.parent()
+        while parent:
+            path = parent.text(0) + '/' + path
+            parent = parent.parent()
+        path = RECYCLED_CODE_DIR + '/' + path
 
-app.exec()
+        with open(path, 'r') as f:
+            text = f.read()
+        self.code_display_content.setText(text)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+
+    window = MainWindow()
+
+    # Add Stylesheet
+    with open("style.qss", 'r') as f:
+        app.setStyleSheet(f.read())
+
+    window.show()
+
+    app.exec()
