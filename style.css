@@ -16,13 +16,6 @@ GREEN: #159947
     background-color: #159947;
 }
 
-.TREE_VIEW {
-    font-size: 20px;
-    padding: 10px;
-    border: none;
-    color: white;
-}
-
 .CODE_CONTENT {
     color: white;
     font-size: 15px;
@@ -32,6 +25,20 @@ GREEN: #159947
 
 .COPY_BUTTON {
     border: none;
+}
+
+/* Style the selection panel */
+
+.SELECTION_BUTTON {
+    border-radius: 5px;
+    font-size: 20px;
+    font-family: Helvetica, sans-serif;
+}
+
+.FILE_SELECTION {
+    border: none;
+    color: white;
+    font-size: 20px;
 }
 
 /* Style the Scroll Bars */
@@ -61,17 +68,4 @@ QScrollBar::sub-line
       color: none;
       width: 0px;
       height: 0px;
-}
-
-/* Style the tree view */
-
-QTreeWidget::branch:open:has-children:!has-siblings,
-QTreeWidget::branch:open:has-children:has-siblings  {
-    border-image: none;
-    image: url(rsc/downarrow.png);
-}
-QTreeWidget::branch:has-children:!has-siblings:closed,
-QTreeWidget::branch:closed:has-children:has-siblings {
-    border-image: none;
-    image: url(rsc/rightarrow.png);
 }

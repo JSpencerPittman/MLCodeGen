@@ -8,21 +8,27 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QMainWindow,
     QTextEdit,
-    QTreeWidget
+    QTreeWidget,
+    QBoxLayout,
+    QListWidget,
+    QListWidgetItem
 )
 
 from PyQt5.QtCore import QSize
 
 from PyQt5.QtGui import QIcon, QTextOption
 
-import sys
+import sys, os
 from filetree import FileTree
 from SyntaxHighlight import PyHighlight
 import pyperclip
+from functools import partial
 
 WINDOW_WIDTH = 1400
 WINDOW_HEIGHT = 800
 RECYCLED_CODE_DIR = "codestore"
+CATEGORIES = ("Preprocessing","Visualization","Training",
+              "Scoring","Utility")
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -30,28 +36,31 @@ class MainWindow(QMainWindow):
         self.central_widget = QWidget()
         self.main_layout = QHBoxLayout()
 
-        self.tree_view = QTreeWidget()
-        
         self.code_display = QWidget()
         self.code_display_layout = QVBoxLayout()
         self.code_display_content = QTextEdit()
 
+        self.selection_panel = QWidget()
+        self.selection_panel_layout = QVBoxLayout()
+
         self.copy_button = QPushButton()
 
-        self.init_tree_view()
+
         self.init_copy_button()
         self.init_code_display()
+        self.init_selection_panel()
 
         self.init_central_widget()
         self.init_main_layout()
 
         self.init_syntax_highlighter()
 
+        self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.setCentralWidget(self.central_widget)
         self.setWindowTitle("ML Code Recycler")
 
     def init_main_layout(self):
-        self.main_layout.addWidget(self.tree_view)
+        self.main_layout.addWidget(self.selection_panel)
         self.main_layout.addWidget(self.code_display)
         self.main_layout.addWidget(self.copy_button)
 
@@ -61,15 +70,57 @@ class MainWindow(QMainWindow):
     def init_central_widget(self):
         self.central_widget.setLayout(self.main_layout)
 
-        self.central_widget.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.central_widget.setProperty('class', 'PRIMARY_DARK')
 
-    def init_tree_view(self):
-        file_tree = FileTree(RECYCLED_CODE_DIR)
-        file_tree.create_file_tree(trim=True)
-        self.tree_view = file_tree.get_qt_tree(self.handle_tree_item_click)
-        self.tree_view.setProperty('class', 'SECONDARY_DARK TREE_VIEW')
-        self.tree_view.setHeaderHidden(True)
+    def init_selection_panel(self):
+        self.selection_panel.setLayout(self.selection_panel_layout)
+        
+        self.selection_panel_layout.setContentsMargins(0,0,0,0)
+        self.selection_panel_layout.setSpacing(30)
+
+        for cat in CATEGORIES:
+            cat_button = self.create_category_button(cat)
+            self.selection_panel_layout.addWidget(cat_button)
+
+    def load_selection_category(self, cat):
+        self.clear_layout(self.selection_panel_layout)
+
+        files = self.load_dir_files(cat)
+    
+        back_button = QPushButton(cat)
+        back_button.clicked.connect(self.handle_selection_back_click)
+
+        file_selection = QListWidget()
+        for file in files:
+            new_item = self.create_file_selection_item(cat, file)
+            file_selection.addItem(new_item)
+        file_selection.itemClicked.connect(partial(self.handle_file_selection_item_click, cat))
+        
+        back_button.setProperty('class', 'GREEN SELECTION_BUTTON')
+        back_button.setMinimumSize(300, 100)
+
+        file_selection.setProperty('class', 'SECONDARY_DARK FILE_SELECTION')
+        file_selection.setSizePolicy(QSizePolicy.Policy.Minimum, 
+                                    QSizePolicy.Policy.Expanding)
+
+        self.selection_panel_layout.addWidget(back_button)
+        self.selection_panel_layout.addWidget(file_selection)
+
+    def create_file_selection_item(self, cat, file):
+        item = QListWidgetItem()
+        item.setText(file)
+        return item
+
+    def create_category_button(self, cat):
+        cat_button = QPushButton(cat)
+
+        cat_button.setSizePolicy(QSizePolicy.Policy.Minimum, 
+                                QSizePolicy.Policy.Expanding)
+        cat_button.setMinimumWidth(300)
+        cat_button.setProperty('class', 'GREEN SELECTION_BUTTON')
+        cat_button.clicked.connect(partial(self.handle_selection_button_click, cat))
+
+        return cat_button
 
     def init_code_display(self):
         self.code_display.setLayout(self.code_display_layout)
@@ -90,6 +141,7 @@ class MainWindow(QMainWindow):
 
         self.copy_button.clicked.connect(self.copy_text_from_code_panel)
 
+
     def init_syntax_highlighter(self):
         self.syntax_highlighter = PyHighlight(self.code_display_content.document())
 
@@ -97,21 +149,32 @@ class MainWindow(QMainWindow):
          pyperclip.copy(self.code_display_content.toPlainText())
          pyperclip.paste()
 
-    def handle_tree_item_click(self, item : QTreeWidgetItem, col:int):
-        # If a directory ignore it
-        if item.childCount() > 0:
-            return
-        
-        path = item.text(0)
-        parent = item.parent()
-        while parent:
-            path = parent.text(0) + '/' + path
-            parent = parent.parent()
-        path = RECYCLED_CODE_DIR + '/' + path
+    def handle_selection_button_click(self, cat):
+        self.load_selection_category(cat)
 
-        with open(path, 'r') as f:
+    def handle_selection_back_click(self):
+        self.clear_layout(self.selection_panel_layout)
+        self.init_selection_panel()
+
+    def handle_file_selection_item_click(self, cat, item: QListWidgetItem):
+        file_path = RECYCLED_CODE_DIR + '/' + cat + '/' + item.text()
+        with open(file_path, 'r') as f:
             text = f.read()
         self.code_display_content.setText(text)
+
+    def load_dir_files(self, directory):
+        path = RECYCLED_CODE_DIR + '/' + directory
+        
+        if not os.path.isdir(path):
+            return []
+        
+        return os.listdir(path)
+    
+    def clear_layout(self, layout: QBoxLayout):
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -119,7 +182,7 @@ if __name__ == "__main__":
     window = MainWindow()
 
     # Add Stylesheet
-    with open("style.qss", 'r') as f:
+    with open("style.css", 'r') as f:
         app.setStyleSheet(f.read())
 
     window.show()
