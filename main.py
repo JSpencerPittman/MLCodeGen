@@ -2,13 +2,11 @@ from PyQt5.QtWidgets import (
     QApplication, 
     QWidget,
     QHBoxLayout,
-    QTreeWidgetItem,
     QVBoxLayout,
     QPushButton,
     QSizePolicy,
     QMainWindow,
     QTextEdit,
-    QTreeWidget,
     QBoxLayout,
     QListWidget,
     QListWidgetItem
@@ -19,7 +17,6 @@ from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon, QTextOption
 
 import sys, os
-from filetree import FileTree
 from SyntaxHighlight import PyHighlight
 import pyperclip
 from functools import partial
@@ -108,7 +105,7 @@ class MainWindow(QMainWindow):
 
     def create_file_selection_item(self, cat, file):
         item = QListWidgetItem()
-        item.setText(file)
+        item.setText(self.make_file_name_pretty(file))
         return item
 
     def create_category_button(self, cat):
@@ -141,7 +138,6 @@ class MainWindow(QMainWindow):
 
         self.copy_button.clicked.connect(self.copy_text_from_code_panel)
 
-
     def init_syntax_highlighter(self):
         self.syntax_highlighter = PyHighlight(self.code_display_content.document())
 
@@ -157,10 +153,24 @@ class MainWindow(QMainWindow):
         self.init_selection_panel()
 
     def handle_file_selection_item_click(self, cat, item: QListWidgetItem):
-        file_path = RECYCLED_CODE_DIR + '/' + cat + '/' + item.text()
+        file_name = self.make_file_name_ugly(item.text())
+        file_path = RECYCLED_CODE_DIR + '/' + cat + '/' + file_name
         with open(file_path, 'r') as f:
             text = f.read()
         self.code_display_content.setText(text)
+
+    def make_file_name_pretty(self, file_name:str):
+        file_name = file_name[:file_name.index('.')]
+        file_name = [word.capitalize() for word in file_name.split('_')]
+        file_name = " ".join(file_name)
+        return file_name
+    
+    def make_file_name_ugly(self, file_name:str):
+        file_name = file_name.lower()
+        file_name = file_name.split(' ')
+        file_name = "_".join(file_name)
+        file_name += '.py'
+        return file_name
 
     def load_dir_files(self, directory):
         path = RECYCLED_CODE_DIR + '/' + directory
