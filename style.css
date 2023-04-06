@@ -16,6 +16,10 @@ GREEN: #159947
     background-color: #159947;
 }
 
+.RED {
+    background-color: #DB0F27;
+}
+
 .CODE_CONTENT {
     color: white;
     font-size: 15px;
@@ -26,6 +30,11 @@ GREEN: #159947
 .COPY_BUTTON {
     border: none;
 }
+
+.EXIT_BUTTON {
+    border: none;
+}
+
 
 /* Style the selection panel */
 

@@ -12,13 +12,9 @@ from PyQt5.QtWidgets import (
     QListWidgetItem,
 )
 
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QSize, Qt, QPoint
 
-from PyQt5.QtGui import (
-    QIcon, 
-    QTextOption,
-    QPixmap
-)
+from PyQt5.QtGui import QIcon, QTextOption
 
 import sys, os
 from SyntaxHighlight import PyHighlight
@@ -54,7 +50,9 @@ class MainWindow(QMainWindow):
 
         self.copy_button = QPushButton()
 
+        self.exit_button = QPushButton()
 
+        self.init_exit_button()
         self.init_copy_button()
         self.init_code_display()
         self.init_selection_panel()
@@ -67,15 +65,18 @@ class MainWindow(QMainWindow):
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.setCentralWidget(self.central_widget)
         self.setWindowTitle("ML Code Recycler")
+        self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
 
         time.sleep(2)
         self.load_screen.hide()
 
+        self.olsPos = self.pos()
 
     def init_main_layout(self):
         self.main_layout.addWidget(self.selection_panel)
         self.main_layout.addWidget(self.code_display)
         self.main_layout.addWidget(self.copy_button)
+        self.main_layout.addWidget(self.exit_button)
 
         self.main_layout.setContentsMargins(30,30,30,30)
         self.main_layout.setSpacing(20)
@@ -158,12 +159,23 @@ class MainWindow(QMainWindow):
 
         self.copy_button.clicked.connect(self.copy_text_from_code_panel)
 
+    def init_exit_button(self):
+        self.exit_button.setSizePolicy(QSizePolicy.Policy.Minimum, 
+                                       QSizePolicy.Policy.Expanding)
+        self.exit_button.setMinimumSize(20,100)
+        self.exit_button.setProperty('class', 'RED EXIT_BUTTON')
+
+        self.exit_button.clicked.connect(self.exit_window)
+
     def init_syntax_highlighter(self):
         self.syntax_highlighter = PyHighlight(self.code_display_content.document())
 
     def copy_text_from_code_panel(self):
          pyperclip.copy(self.code_display_content.toPlainText())
          pyperclip.paste()
+
+    def exit_window(self):
+        app.exit()
 
     def handle_selection_button_click(self, cat):
         self.load_selection_category(cat)
@@ -205,6 +217,14 @@ class MainWindow(QMainWindow):
             child = layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
+
+    def mousePressEvent(self, event):
+        self.oldPos = event.globalPos()
+
+    def mouseMoveEvent(self, event):
+        delta = QPoint(event.globalPos() - self.oldPos)
+        self.move(self.x() + delta.x(), self.y() + delta.y())
+        self.oldPos = event.globalPos()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
