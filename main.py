@@ -9,17 +9,23 @@ from PyQt5.QtWidgets import (
     QTextEdit,
     QBoxLayout,
     QListWidget,
-    QListWidgetItem
+    QListWidgetItem,
 )
 
 from PyQt5.QtCore import QSize
 
-from PyQt5.QtGui import QIcon, QTextOption
+from PyQt5.QtGui import (
+    QIcon, 
+    QTextOption,
+    QPixmap
+)
 
 import sys, os
 from SyntaxHighlight import PyHighlight
 import pyperclip
 from functools import partial
+from load_screen import LoadingScreen
+import time
 
 WINDOW_WIDTH = 1400
 WINDOW_HEIGHT = 800
@@ -30,6 +36,12 @@ CATEGORIES = ("Preprocessing","Visualization","Training",
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        self.init_icon()
+
+        self.load_screen = LoadingScreen()
+        self.load_screen.show()
+
         self.central_widget = QWidget()
         self.main_layout = QHBoxLayout()
 
@@ -56,6 +68,10 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.central_widget)
         self.setWindowTitle("ML Code Recycler")
 
+        time.sleep(2)
+        self.load_screen.hide()
+
+
     def init_main_layout(self):
         self.main_layout.addWidget(self.selection_panel)
         self.main_layout.addWidget(self.code_display)
@@ -64,6 +80,10 @@ class MainWindow(QMainWindow):
         self.main_layout.setContentsMargins(30,30,30,30)
         self.main_layout.setSpacing(20)
 
+    def init_icon(self):
+        path = os.getcwd() + '/rsc/icon256x256.png'
+        self.setWindowIcon(QIcon(path))
+    
     def init_central_widget(self):
         self.central_widget.setLayout(self.main_layout)
 
@@ -197,4 +217,5 @@ if __name__ == "__main__":
 
     window.show()
 
+    app.setWindowIcon(QIcon('C:/Users/lilsp/ML/MLCodeGen/rsc/icon256x256.png'))
     app.exec()
